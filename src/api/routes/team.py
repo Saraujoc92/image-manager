@@ -5,16 +5,19 @@ from database.client import DbSession
 from api.schemas.team import CreateTeamRequest
 from api.auth.require_admin import RequireAdmin
 from api.auth.require_team import RequireActiveTeam
+from api.rate_limiter import limiter
 
 router = APIRouter(prefix="/teams", tags=["Teams"])
 
 
 @router.get("/all")
+@limiter.limit("10/minute")
 def get_all_teams(db: DbSession, api_key: RequireAdmin, request: Request):
     return service.get_all_teams(db, request)
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
+@limiter.limit("5/minute")
 def create_team(
     db: DbSession, team_data: CreateTeamRequest, api_key: RequireAdmin, request: Request
 ):
@@ -23,6 +26,7 @@ def create_team(
 
 
 @router.delete("/{team_id}")
+@limiter.limit("1/minute")
 def delete_team(team: RequireActiveTeam, db: DbSession, api_key: RequireAdmin, request: Request):
     service.delete_team(db, team.id, request)
     return {"detail": "Team deleted successfully"}

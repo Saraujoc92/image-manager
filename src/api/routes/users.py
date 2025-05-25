@@ -5,12 +5,14 @@ from api.auth.require_team import RequireActiveTeam, RequireSameTeam
 from api.auth.require_admin import RequireAdmin
 from api.schemas.user import CreateUserRequest
 from service import user as service
+from api.rate_limiter import limiter
 
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
 @router.get("/all")
+@limiter.limit("5/minute")
 def get_all_users(db: DbSession, user: RequireAdmin, request: Request):
     return service.get_all_users(db, request)
 
@@ -23,6 +25,7 @@ def get_all_team_users(
 
 
 @router.post("/{team_id}", status_code=status.HTTP_201_CREATED)
+@limiter.limit("10/minute")
 def create_new_user(
     db: DbSession,
     user: RequireSameTeam,
