@@ -1,13 +1,15 @@
-from typing import Annotated
-from fastapi import APIRouter, File, Request
+from fastapi import APIRouter, Request, UploadFile
 
 from api.auth.require_team import RequireActiveTeam, RequireSameTeamUser
+from api.exceptions import BadRequestError
 from database.client import DbSession
 from api.rate_limiter import limiter
 import logger
 from service import image as image_service
 
 router = APIRouter(prefix="/team/{team_id}/image", tags=["Images"])
+
+ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png"}
 
 
 @router.post("", status_code=201)
@@ -17,10 +19,18 @@ def upload_image(
     user: RequireSameTeamUser,
     team: RequireActiveTeam,
     request: Request,
-    file: Annotated[bytes, File(min_length=1)],
+    file: UploadFile,
 ):
+    if file.content_type not in ALLOWED_IMAGE_TYPES:
+        raise BadRequestError("Unsupported image type. Allowed types are: JPEG, PNG")
+
     logger.info(f"Uploading image for team {team.id}", request)
-    image_service.upload_image(db, team.id, user.id, file, request)
+    image_bytes = file.file.read()
+    
+    if not image_bytes:
+        raise BadRequestError("Empty file")
+    
+    image_service.upload_image(db, team.id, user.id, image_bytes, request)
     return {"message": "Uploaded successfully", "team_id": team.id, "user_id": user.id}
 
 

@@ -1,5 +1,5 @@
 def test_upload_image(client, new_team_and_user):
-    team, user = new_team_and_user("Test Team for Image Upload", "user@test.com")
+    team, user = new_team_and_user("Test Team for Image Upload")
     team_id = team["id"]
     headers = {"X-API-Key": user["api_key"]}
     image_data = {
@@ -65,3 +65,37 @@ def test_image_team_only_access(client, new_team_and_user):
     response_data = response.json()
     assert "images" in response_data
     assert len(response_data["images"]) == 1
+
+def test_upload_empty_file(client, admin_headers, new_team):
+    team = new_team("Test Team for Empty File Upload")
+    team_id = team["id"]
+
+    response = client.post(
+        f"/api/v1/team/{team_id}/user",
+        headers=admin_headers,
+    )
+    assert response.status_code == 400
+    
+    response = client.post(
+        f"/api/v1/team/{team_id}/image",
+        files={"file": ("empty_file.jpg", b"", "image/jpeg")},
+        headers=admin_headers,
+    )
+    assert response.status_code == 400
+
+def test_upload_invalid_image_type(client, new_team_and_user):
+    team, user = new_team_and_user("Test Team for Invalid Image Type")
+    team_id = team["id"]
+    headers = {"X-API-Key": user["api_key"]}
+    image_data = {
+        "name": "invalid_image.txt",
+        "description": "An invalid image type for upload",
+        "file": ("invalid_image.txt", b"fake_text_data", "text/plain"),
+    }
+    response = client.post(
+        f"/api/v1/team/{team_id}/image",
+        files=image_data,
+        headers=headers,
+    )
+    assert response.status_code == 400
+                                   

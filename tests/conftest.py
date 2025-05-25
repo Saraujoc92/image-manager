@@ -1,6 +1,5 @@
 from datetime import datetime
 import uuid
-from fastapi import Request
 from clients import cloud_storage
 import pytest
 from sqlalchemy import create_engine
@@ -136,7 +135,7 @@ def new_user(client, admin_headers):
 
 @pytest.fixture()
 def new_team_and_user(new_team, new_user):
-    def _create_team_and_user(team_name, user_email):
+    def _create_team_and_user(team_name, user_email="mail@test.com"):
         team = new_team(team_name)
         user = new_user(user_email, team["id"])
         return team, user
