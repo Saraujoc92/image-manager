@@ -18,7 +18,7 @@ def get_all_teams(db: DbSession, request: Request) -> Sequence[Team]:
     return teams
 
 
-def get_team_by_id(db: DbSession, team_id: str, request: Request) -> Team:
+def get_team_by_id(db: DbSession, team_id: UUID, request: Request) -> Team:
     team = team_repository.get_team_by_id(db, team_id)
     if not team:
         raise NotFoundError(message="Team not found")

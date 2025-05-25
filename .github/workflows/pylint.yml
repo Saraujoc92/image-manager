@@ -1,13 +1,18 @@
-name: Lint
+name: Lint and Test
 
 on: [push]
 
 jobs:
-  lint:
+  lint_and_test:
     runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: src
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v2
-      - uses: chartboost/ruff-action@v1
-        with:
-          args: check
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: Lint
+        run: uv run ruff check
+      - name: Run tests
+        run: uv run pytest tests

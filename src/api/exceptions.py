@@ -12,3 +12,6 @@ class NotFoundError(HTTPException):
 class BadRequestError(HTTPException):
     def __init__(self, message: str = "Bad request"):
         super().__init__(status_code=400, detail=message)
+        
+def validation_exception_handler(request, exc):
+    raise BadRequestError()

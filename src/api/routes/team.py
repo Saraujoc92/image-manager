@@ -25,8 +25,7 @@ def create_team(
     return new_team
 
 
-@router.delete("/{team_id}")
+@router.delete("/{team_id}", status_code=status.HTTP_204_NO_CONTENT)
 @limiter.limit("1/minute")
 def delete_team(team: RequireActiveTeam, db: DbSession, api_key: RequireAdmin, request: Request):
     service.delete_team(db, team.id, request)
-    return {"detail": "Team deleted successfully"}

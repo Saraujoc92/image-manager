@@ -9,7 +9,7 @@ class ApiKey(Base):
     __tablename__ = "api_key"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    key = Column(String, unique=True, index=True, default=uuid.uuid4)
+    key = Column(String, unique=True, index=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(UUID(as_uuid=True), ForeignKey("app_user.id"), nullable=False)
     active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.now())

@@ -25,5 +25,5 @@ def get_api_key(db: DbSession, key: str) -> Optional[ApiKey]:
 
 def deactivate_api_key_for_users(db: DbSession, user_ids: list[UUID]) -> None:
     db.query(ApiKey).filter(ApiKey.user_id.in_(user_ids)).update(
-        {"active": False, "revoked_at": datetime.now()}, synchronize_session=False
+        {"active": False, "deleted_at": datetime.now()}, synchronize_session=False
     )

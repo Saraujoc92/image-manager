@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID
 from pydantic import BaseModel
 
@@ -7,7 +8,7 @@ class ApiKey(BaseModel):
     user_id: UUID
     active: bool = True
     created_at: str
-    deleted_at: str
+    deleted_at: Optional[str] = None
 
     def __repr__(self):
         return f"<ApiKey(id={self.id}, key={self.key}, user_id={self.user_id})>"

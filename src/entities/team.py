@@ -1,6 +1,6 @@
+from typing import Optional
 from uuid import UUID
 from pydantic import BaseModel
-from typing import Union
 
 
 class Team(BaseModel):
@@ -8,7 +8,7 @@ class Team(BaseModel):
     name: str
     active: bool = True
     created_at: str
-    deleted_at: Union[str, None] = None
+    deleted_at: Optional[str] = None
 
     def __repr__(self):
         return f"<Team(name='{self.name}', id='{self.id}')>"

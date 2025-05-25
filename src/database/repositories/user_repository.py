@@ -2,7 +2,6 @@ from datetime import datetime
 from uuid import UUID
 import logger
 from typing import Optional
-from psycopg2.errors import UniqueViolation
 from sqlalchemy.exc import IntegrityError
 
 from fastapi import Request
@@ -20,14 +19,12 @@ def add_user(
         db.refresh(new_user)
         return CreateUserResponseBase.model_validate(new_user)
 
-    except IntegrityError as e:
-        if isinstance(e.orig, UniqueViolation):
-            logger.info(
-                f"User already exists: {new_user.email}.",
-                request,
-            )
-            return None
-        raise e
+    except IntegrityError:
+        logger.info(
+            f"User already exists: {new_user.email}.",
+            request,
+        )
+        return None
 
     except Exception as e:
         logger.error(f"Unexpected error adding user: {e}", request)

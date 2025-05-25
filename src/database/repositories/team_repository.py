@@ -10,7 +10,7 @@ def get_all_teams(db: DbSession) -> list[Team]:
     return db.query(Team).all()
 
 
-def get_team_by_id(db: DbSession, team_id: str) -> Optional[Team]:
+def get_team_by_id(db: DbSession, team_id: UUID) -> Optional[Team]:
     return db.query(Team).filter(Team.id == team_id, Team.active).first()
 
 

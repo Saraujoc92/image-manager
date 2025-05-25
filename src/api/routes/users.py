@@ -17,7 +17,7 @@ def get_all_users(db: DbSession, user: RequireAdmin, request: Request):
     return service.get_all_users(db, request)
 
 
-@router.get("/all/{team_id}")
+@router.get("/{team_id}/all")
 def get_all_team_users(
     db: DbSession, user: RequireSameTeam, team: RequireActiveTeam, request: Request
 ):
