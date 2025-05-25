@@ -1,7 +1,6 @@
-def test_delete_team(client, admin_headers, new_team, new_user):
-    team = new_team("Test Team for Deletion")
+def test_delete_team(client, admin_headers, new_team_and_user):
+    team, user = new_team_and_user("Test Team for Deletion", "deleteme@test.com")
     team_id = team["id"]
-    user = new_user("deleteme@test.com", team_id)
     # Test the api key of the user
     assert "api_key" in user
     team_users = client.get(

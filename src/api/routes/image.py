@@ -17,7 +17,7 @@ def upload_image(
     user: RequireSameTeamUser,
     team: RequireActiveTeam,
     request: Request,
-    file: Annotated[bytes, File()],
+    file: Annotated[bytes, File(min_length=1)],
 ):
     logger.info(f"Uploading image for team {team.id}", request)
     image_service.upload_image(db, team.id, user.id, file, request)

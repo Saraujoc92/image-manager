@@ -44,3 +44,21 @@ def test_fail_bad_request_create_user(client, admin_headers, new_team):
         headers=admin_headers,
     )
     assert response.status_code == 400
+
+def test_upload_empty_file(client, admin_headers, new_team):
+    team = new_team("Test Team for Empty File Upload")
+    team_id = team["id"]
+
+    response = client.post(
+        f"/api/v1/team/{team_id}/user",
+        headers=admin_headers,
+    )
+    assert response.status_code == 400
+    
+    response = client.post(
+        f"/api/v1/team/{team_id}/image",
+        files={"file": ("empty_file.jpg", b"", "image/jpeg")},
+        headers=admin_headers,
+    )
+    assert response.status_code == 400
+    

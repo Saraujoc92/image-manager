@@ -1,4 +1,4 @@
-def test_upload_image(client, admin_headers, new_team_and_user):
+def test_upload_image(client, new_team_and_user):
     team, user = new_team_and_user("Test Team for Image Upload", "user@test.com")
     team_id = team["id"]
     headers = {"X-API-Key": user["api_key"]}
@@ -31,7 +31,7 @@ def test_upload_image(client, admin_headers, new_team_and_user):
     assert "url" in image
 
 
-def test_image_team_only_access(client, admin_headers, new_team_and_user):
+def test_image_team_only_access(client, new_team_and_user):
     team, user = new_team_and_user("Test Team for Image Access", "owner@mail.com")
     team_id = team["id"]
     headers = {"X-API-Key": user["api_key"]}

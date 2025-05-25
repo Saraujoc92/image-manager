@@ -63,7 +63,7 @@ def db_session(admin_api_key):
 
 @pytest.fixture(scope="function", autouse=True)
 def mock_cloud_storage(monkeypatch):
-    def upload_file_to_bucket(file_path: str, file: bytes, request: Request):
+    def upload_file_to_bucket(**_):
         pass
 
     def get_bucket_file_url(path):
