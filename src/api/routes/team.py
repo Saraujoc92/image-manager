@@ -7,7 +7,7 @@ from api.auth.require_admin import RequireAdmin
 from api.auth.require_team import RequireActiveTeam
 from api.rate_limiter import limiter
 
-router = APIRouter(prefix="/teams", tags=["Teams"])
+router = APIRouter(prefix="/team", tags=["Teams"])
 
 
 @router.get("/all")

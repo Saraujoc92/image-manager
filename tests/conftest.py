@@ -1,5 +1,7 @@
 from datetime import datetime
 import uuid
+from fastapi import Request
+from clients import cloud_storage
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -59,6 +61,18 @@ def db_session(admin_api_key):
         Base.metadata.drop_all(bind=engine)
 
 
+@pytest.fixture(scope="function", autouse=True)
+def mock_cloud_storage(monkeypatch):
+    def upload_file_to_bucket(file_path: str, file: bytes, request: Request):
+        pass
+
+    def get_bucket_file_url(path):
+        return f"https://mock-cloud-storage.com/{path}"
+
+    monkeypatch.setattr(cloud_storage, "upload_file_to_bucket", upload_file_to_bucket)
+    monkeypatch.setattr(cloud_storage, "get_bucket_file_url", get_bucket_file_url)
+
+
 @pytest.fixture(scope="function")
 def client(db_session):
     from main import app
@@ -96,7 +110,7 @@ def admin_headers(admin_api_key):
 def new_team(client, admin_headers):
     def _create_team(team_name):
         create_team_response = client.post(
-            "/api/v1/teams", json={"name": team_name}, headers=admin_headers
+            "/api/v1/team", json={"name": team_name}, headers=admin_headers
         )
         assert create_team_response.status_code == 201
         team = create_team_response.json()
@@ -110,7 +124,7 @@ def new_team(client, admin_headers):
 def new_user(client, admin_headers):
     def _create_user(email, team_id):
         response = client.post(
-            f"/api/v1/users/{team_id}",
+            f"/api/v1/team/{team_id}/user",
             json={"email": email, "name": "Test User"},
             headers=admin_headers,
         )
@@ -118,6 +132,7 @@ def new_user(client, admin_headers):
         return user
 
     return _create_user
+
 
 @pytest.fixture()
 def new_team_and_user(new_team, new_user):

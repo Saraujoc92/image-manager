@@ -11,11 +11,8 @@ load_dotenv()
 DATABASE_URL = (
     os.getenv("DATABASE_URL")
     or "postgresql://postgres:password@localhost:5432/image_db"
+    # or "sqlite:///./test.db"
 )
-
-""" Or hard code SQLite here """
-# DATABASE_URL = "sqlite:///./todosapp.db"
-
 
 engine = create_engine(DATABASE_URL)
 

@@ -8,7 +8,7 @@ from logger import configure_logging
 from api.middleware.request_id import RequestIdMiddleware
 from api.middleware.log_context import LoggerContextMiddleware
 from api.exceptions import validation_exception_handler
-from api.register_routes import register_routes
+from api.routes.register import register_routes
 from api.rate_limiter import limiter, rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
