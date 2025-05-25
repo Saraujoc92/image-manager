@@ -1,11 +1,11 @@
+from uuid import UUID
 from pydantic import BaseModel
 
 class ApiKey(BaseModel):
-    id: str
+    id: UUID
     key: str
-    user_id: str
+    user_id: UUID
     active: bool = True
-    is_admin: bool = False
     created_at: str
     deleted_at: str
 

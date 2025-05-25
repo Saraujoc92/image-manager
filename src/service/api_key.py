@@ -1,31 +1,34 @@
-import logging
+from datetime import datetime
+import logger
 
+from typing import Annotated
 from uuid import UUID
-from fastapi import HTTPException
+from fastapi import Depends, Request
 
 from database.client import DbSession
-from database.models.api_key import ApiKey
-from database.models.user import User
+from database.repositories import api_key_repository as api_key_repo
 from entities.api_key import ApiKey as ApiKeyModel
+from api.auth.require_api_key import RequireApiKeyHeader
+from api.exceptions import AuthorizationError
 
-def get_api_key(db: DbSession, api_key: str) -> ApiKeyModel:
-    """
-    Retrieve an API key from the database ensuring it exists and is active.
 
-    Args:
-        db (Session): The database session.
-        api_key (str): The API key to retrieve.
-
-    Returns:
-        ApiKey: The retrieved API key object.
-    """
+def get_api_key(
+    db: DbSession, api_key: RequireApiKeyHeader, request: Request
+) -> ApiKeyModel:
     if not api_key:
-        logging.debug("API key is empty or None.")
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    api_key_obj = db.query(ApiKey).filter(ApiKey.key == api_key, ApiKey.active).first()
-
+        logger.debug("API key is empty or None.", request)
+        raise AuthorizationError()
+    api_key_obj = api_key_repo.get_api_key(db, api_key)
     if not api_key_obj:
-        logging.debug(f"API key {api_key} not found.")
-        raise HTTPException(status_code=401, detail="Unauthorized")
+        logger.debug(f"API key {api_key} not found.", request)
+        raise AuthorizationError()
     return api_key_obj
 
+
+def create_api_key(db: DbSession, user_id: UUID, request: Request) -> ApiKeyModel:
+    new_api_key = api_key_repo.create_api_key(db, user_id)
+    logger.info(f"New API key created with ID: {new_api_key.id}", request)
+    return new_api_key
+
+
+DependsApiKey = Annotated[ApiKeyModel, Depends(get_api_key)]

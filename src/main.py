@@ -1,18 +1,17 @@
 import logging
 from fastapi import FastAPI
 
-from api.register_routes import register_routes
 from logger import configure_logging
-from database.client import engine, Base
-from database.models.user import User
-from database.models.team import Team
-from database.models.api_key import ApiKey
+from api.middleware.request_id import RequestIdMiddleware
+from api.middleware.log_context import LoggerContextMiddleware
 
-Base.metadata.create_all(bind=engine)
+from api.register_routes import register_routes
 
 configure_logging(logging.DEBUG)
 
 app = FastAPI()
 
+app.add_middleware(RequestIdMiddleware)
+app.add_middleware(LoggerContextMiddleware)
 
 register_routes(app)

@@ -14,8 +14,9 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
     name = Column(String, nullable=False)
     active = Column(Boolean, default=True)
+    is_admin = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.now())
-    deleted_at = Column(DateTime, default=datetime.now())
+    deleted_at = Column(DateTime)
 
     def __repr__(self):
         return f"<User(email='{self.email}', name='{self.name}')>"

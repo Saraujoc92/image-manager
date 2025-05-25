@@ -1,15 +1,22 @@
-from fastapi import APIRouter, Depends, HTTPException
+import logger
+from fastapi import Depends, Request
 from typing import Annotated
 
-from service.api_key import get_api_key
 from entities.api_key import ApiKey
+from api.exceptions import AuthorizationError
+from entities.user import User
+from service.user import get_current_user
 
-DependsApiKey = Annotated[ApiKey, Depends(get_api_key)]
 
-def require_admin(api_key: DependsApiKey) -> ApiKey:
-    if not api_key.is_admin:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+CurrentUser = Annotated[User, Depends(get_current_user)]
 
-    return api_key
+
+def require_admin(user: CurrentUser, request: Request) -> User:
+    if not user.is_admin:
+        logger.warning(f"User {user.id} is not an admin.", request)
+        raise AuthorizationError()
+
+    return user
+
 
 RequireAdmin = Annotated[ApiKey, Depends(require_admin)]
