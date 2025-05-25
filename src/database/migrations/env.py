@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from database.models import api_key, team, user
+from database.models import api_key, team, user  # noqa: F401
 from database.client import Base
 
 # this is the Alembic Config object, which provides

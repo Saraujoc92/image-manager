@@ -1,11 +1,9 @@
 import logger
-from datetime import datetime
 from uuid import UUID
 
 from api.schemas.user import (
     CreateUserRequest,
     CreateUserResponse,
-    CreateUserResponseBase,
 )
 from database.models.user import User
 from database.client import DbSession
