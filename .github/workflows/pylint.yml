@@ -13,6 +13,7 @@ jobs:
       - uses: actions/setup-python@v2
       - name: Install uv
         uses: astral-sh/setup-uv@v5
+      - run: cd apps/image_api
       - name: Lint
         run: uv run ruff check
       - name: Run tests

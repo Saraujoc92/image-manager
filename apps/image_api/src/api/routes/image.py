@@ -30,7 +30,7 @@ def upload_image(
     if not image_bytes:
         raise BadRequestError("Empty file")
     
-    image_service.upload_image(db, team.id, user.id, image_bytes, request)
+    image_service.upload_image(db, team.id, user.id, file.filename, image_bytes, request)
     return {"message": "Uploaded successfully", "team_id": team.id, "user_id": user.id}
 
 
