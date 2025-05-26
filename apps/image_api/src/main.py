@@ -1,4 +1,4 @@
-import env
+import env  # noqa: F401 loading dotenv
 
 import logging
 from fastapi import FastAPI
