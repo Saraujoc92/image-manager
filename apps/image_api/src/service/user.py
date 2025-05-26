@@ -10,7 +10,7 @@ from database.client import DbSession
 from entities.user import User as UserModel
 from service.api_key import DependsApiKey, create_api_key
 from fastapi import Request
-from database.repositories import user_repository
+from database.repositories import user_repository, api_key_repository
 
 from api.middleware.log_context import add_user_id_to_log_context
 from api.exceptions import BadRequestError, NotFoundError
@@ -58,3 +58,11 @@ def create_new_user(
     logger.info(f"New user in team {team_id} created with ID: {new_user.id}", request)
 
     return CreateUserResponse(**new_user.model_dump(), api_key=api_key.key)
+
+def rotate_user_credentials(
+    db: DbSession, user: UserModel, request: Request
+) -> str:
+    logger.info("Rotating credentials", request)
+    api_key_repository.deactivate_api_key_for_users(db, [user.id])
+    new_api_key = api_key_repository.create_api_key(db, user.id)
+    return str(new_api_key.key)

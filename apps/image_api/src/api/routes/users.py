@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request, status
 
 from database.client import DbSession
+from api.auth.require_self import RequireSelf
 from api.auth.require_team import RequireActiveTeam, RequireSameTeamUser
 from api.auth.require_admin import RequireAdmin
 from api.schemas.user import CreateUserRequest
@@ -15,6 +16,13 @@ router = APIRouter(tags=["Users"])
 @limiter.limit("5/minute")
 def get_all_users(db: DbSession, user: RequireAdmin, request: Request):
     return service.get_all_users(db, request)
+
+
+@router.post("/user/{user_id}/credentials/rotate")
+@limiter.limit("1/minute")
+def rotate_user_credentials(db: DbSession, user: RequireSelf, request: Request):
+    new_api_key = service.rotate_user_credentials(db, user, request)
+    return {"api_key": new_api_key}
 
 
 @router.get("/team/{team_id}/user/all")

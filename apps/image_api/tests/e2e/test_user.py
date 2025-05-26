@@ -44,3 +44,34 @@ def test_fail_bad_request_create_user(client, admin_headers, new_team):
         headers=admin_headers,
     )
     assert response.status_code == 400
+
+def test_rotate_user_credentials(client, new_team_and_user):
+    team, user = new_team_and_user("Test Team for User Credential Rotation")
+    team_id = team["id"]
+    user_id = user["id"]
+    headers = {"X-API-Key": user["api_key"]}
+    
+    response = client.post(
+        f"/api/v1/user/{user_id}/credentials/rotate",
+        headers=headers,
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert "api_key" in data
+    new_api_key = data["api_key"]
+    assert new_api_key != user["api_key"]
+    
+    # Verify the old API key is no longer valid
+    response = client.get(
+        f"/api/v1/team/{team_id}/user/all",
+        headers=headers,
+    )
+    assert response.status_code == 403
+    
+    response = client.get(
+        f"/api/v1/team/{team_id}/user/all",
+        headers={"X-API-Key": new_api_key},
+    )
+    assert response.status_code == 200
+                 
+    
