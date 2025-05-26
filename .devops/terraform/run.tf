@@ -29,11 +29,11 @@ resource "google_cloud_run_service" "image_manager_app" {
             value ="postgresql://${var.db_username}:${var.db_password}@${google_sql_database_instance.image_manager_db.public_ip_address}:5432/${var.db_instance_name}"
         }
         env {
-            name  = "IMAGE_UPLOAD_BUCKET"
+            name  = "IMAGE_UPLOAD_BUCKET_NAME"
             value = var.image_upload_bucket_name
         }
         env {
-            name  = "LOGGER_BUCKET"
+            name  = "LOGGER_BUCKET_NAME"
             value = var.logger_bucket_name
         }
         ports {

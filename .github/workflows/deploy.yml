@@ -7,7 +7,8 @@ on:
       - completed
 
 jobs:
-  upload:
+  deploy:
+    name: Build and Deploy to Dev 
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' }}
     runs-on: ubuntu-latest
     environment: dev
@@ -30,20 +31,9 @@ jobs:
         run: |-
             docker build \
               -f .devops/docker/api/dev/Dockerfile \
-              -t "${{ vars.REGION }}-docker.pkg.dev/${{ secrets.GC_PROJECT_ID }}/docker-repository/image-manager-api:${{ github.sha }}" \
+              -t "${{ vars.REGION }}-docker.pkg.dev/${{ secrets.GC_PROJECT_ID }}/docker-repository/image-manager-api" \
               ./
-            docker push "${{ vars.REGION }}-docker.pkg.dev/${{ secrets.GC_PROJECT_ID }}/docker-repository/image-manager-api:${{ github.sha }}"
-  
-  deploy:
-    runs-on: ubuntu-latest
-    needs: upload
-    environment: dev
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Google Cloud auth
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"
+            docker push "${{ vars.REGION }}-docker.pkg.dev/${{ secrets.GC_PROJECT_ID }}/docker-repository/image-manager-api"
       - uses: hashicorp/setup-terraform@v3
       - run: terraform init
         working-directory: .devops/terraform
@@ -73,6 +63,7 @@ jobs:
         working-directory: .devops/terraform
 
   migrate:
+    name: Run Migrations
     needs: deploy
     runs-on: ubuntu-latest
     environment: dev
