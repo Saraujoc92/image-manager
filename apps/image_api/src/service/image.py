@@ -17,7 +17,7 @@ def upload_image(
 ):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     image_path = f"team_{team_id}/{uploader_id}/{file_name}_{timestamp}.jpg"
-    cloud_storage_client.upload_file_to_bucket(
+    cloud_storage_client.upload_image_to_bucket(
         file_path=image_path, file=image, request=request
     )
     insert_image(

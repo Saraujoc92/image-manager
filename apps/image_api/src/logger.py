@@ -34,8 +34,11 @@ def info(message: str, request: Request) -> None:
 
 def warning(message: str, request: Request) -> None:
     logging.warning(_log_context(request, message))
-
+    from clients.cloud_storage import upload_log
+    upload_log(message, request)
+    
 
 def error(message: str, request: Request) -> None:
     logging.error(_log_context(request, message))
-    # TODO: Implement error logging to alering service
+    from clients.cloud_storage import upload_log
+    upload_log(message, request)

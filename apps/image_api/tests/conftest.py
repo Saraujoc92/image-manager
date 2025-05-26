@@ -62,14 +62,18 @@ def db_session(admin_api_key):
 
 @pytest.fixture(scope="function", autouse=True)
 def mock_cloud_storage(monkeypatch):
-    def upload_file_to_bucket(**_):
+    def upload_image_to_bucket(**_):
         pass
 
     def get_bucket_file_url(path):
         return f"https://mock-cloud-storage.com/{path}"
 
-    monkeypatch.setattr(cloud_storage, "upload_file_to_bucket", upload_file_to_bucket)
+    def upload_log(*_):
+        pass
+
+    monkeypatch.setattr(cloud_storage, "upload_image_to_bucket", upload_image_to_bucket)
     monkeypatch.setattr(cloud_storage, "get_bucket_file_url", get_bucket_file_url)
+    monkeypatch.setattr(cloud_storage, "upload_log", upload_log)
 
 
 @pytest.fixture(scope="function")
