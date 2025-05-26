@@ -1,7 +1,7 @@
 version: '3.9'
 
 services:
-  api:
+  images_api:
     build: 
       context: .
       dockerfile: .devops/docker/api/dev/Dockerfile

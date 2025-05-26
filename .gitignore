@@ -3,3 +3,8 @@
 test.db
 __pycache__
 gcloud_credentials.json
+
+terraform.tfvars
+terraform.tfvars.json
+.terraform/
+*.tfstate*
