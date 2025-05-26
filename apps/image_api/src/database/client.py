@@ -3,11 +3,7 @@ from fastapi import Depends
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
-
-""" You can add a DATABASE_URL environment variable to your .env file """
 DATABASE_URL = (
     os.getenv("DATABASE_URL")
     or "postgresql://postgres:password@localhost:5432/image_db"

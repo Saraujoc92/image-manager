@@ -1,4 +1,4 @@
-from dotenv import load_dotenv
+import env  # noqa: F401 loading dotenv
 
 import logging
 from fastapi import FastAPI
@@ -11,8 +11,6 @@ from api.exceptions import validation_exception_handler
 from api.routes.register import register_routes
 from api.rate_limiter import limiter, rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-
-load_dotenv()
 
 configure_logging(logging.DEBUG)
 

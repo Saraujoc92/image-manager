@@ -3,19 +3,21 @@ FROM python:3.12-slim
 WORKDIR /image-manager
 
 RUN apt-get update \
-    && apt-get -y install libpq-dev gcc \
-    && pip install psycopg2
+    && apt-get install -y libpq-dev gcc curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-COPY ./pyproject.toml .
-COPY ./uv.lock .
+COPY ./apps/image_api/pyproject.toml ./apps/image_api/uv.lock ./
 
-COPY .env .
-COPY src/ .
+RUN uv venv \
+    && uv sync --frozen
 
-RUN uv sync --frozen --no-cache
+COPY ./apps/image_api/src ./src
+
+ENV PYTHONPATH=src
 
 # Run the application.
-CMD ["/image-manager/.venv/bin/fastapi", "run", "/image-manager/main.py", "--port", "8000", "--host", "0.0.0.0"]
+CMD [".venv/bin/fastapi", "run", "./src/main.py", "--port", "8000", "--host", "0.0.0.0"]
 

@@ -8,10 +8,15 @@ from database.repositories.image_repository import insert_image, get_all_team_im
 
 
 def upload_image(
-    db: DbSession, team_id: UUID, uploader_id: UUID, image: bytes, request: Request
+    db: DbSession,
+    team_id: UUID,
+    uploader_id: UUID,
+    file_name: str,
+    image: bytes,
+    request: Request,
 ):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    image_path = f"team_{team_id}/{uploader_id}_{timestamp}.jpg"
+    image_path = f"team_{team_id}/{uploader_id}/{file_name}_{timestamp}.jpg"
     cloud_storage_client.upload_file_to_bucket(
         file_path=image_path, file=image, request=request
     )
