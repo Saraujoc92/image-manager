@@ -2,15 +2,82 @@ name: Deploy
 
 on:
   workflow_run:
-    workflows: ["Test"]
+    workflows: ["Lint and Test"]
     types:
       - completed
 
 jobs:
-  deploy:
+  upload:
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' }}
     runs-on: ubuntu-latest
     environment: dev
+    env:
+      ZONE: us-central1-a
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Google Cloud auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"
+      - name: Docker Auth
+        id: docker-auth
+        uses: 'docker/login-action@v1'
+        with:
+          registry: "${{ vars.REGION }}-docker.pkg.dev"
+          username: _json_key
+          password: ${{ secrets.GOOGLE_CREDENTIALS }}
+      - name: Build and Push Container
+        run: |-
+            docker build \
+              -f .devops/docker/api/dev/Dockerfile \
+              -t "${{ vars.REGION }}-docker.pkg.dev/${{ secrets.GC_PROJECT_ID }}/docker-repository/image-manager-api:${{ github.sha }}" \
+              ./
+            docker push "${{ vars.REGION }}-docker.pkg.dev/${{ secrets.GC_PROJECT_ID }}/docker-repository/image-manager-api:${{ github.sha }}"
+  
+  deploy:
+    runs-on: ubuntu-latest
+    needs: upload
+    environment: dev
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Google Cloud auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform init
+        working-directory: .devops/terraform
+      - name: Terraform Plan
+        run: |
+          terraform plan \
+            -var="gc_project_id=${{ secrets.GC_PROJECT_ID }}" \
+            -var="region=${{ vars.REGION }}" \
+            -var="zone=${{ vars.ZONE }}" \
+            -var="db_instance_name=${{ secrets.DB_INSTANCE_NAME }}" \
+            -var="db_username=${{ secrets.DB_USERNAME }}" \
+            -var="db_password=${{ secrets.DB_PASSWORD }}" \
+            -var="image_upload_bucket_name=${{ secrets.IMAGE_UPLOAD_BUCKET_NAME }}" \
+            -var="logger_bucket_name=${{ secrets.LOGGER_BUCKET_NAME }}"
+        working-directory: .devops/terraform
+      - name: Terraform Apply
+        run: |
+          terraform apply -auto-approve \
+            -var="gc_project_id=${{ secrets.GC_PROJECT_ID }}" \
+            -var="region=${{ vars.REGION }}" \
+            -var="zone=${{ vars.ZONE }}" \
+            -var="db_instance_name=${{ secrets.DB_INSTANCE_NAME }}" \
+            -var="db_username=${{ secrets.DB_USERNAME }}" \
+            -var="db_password=${{ secrets.DB_PASSWORD }}" \
+            -var="image_upload_bucket_name=${{ secrets.IMAGE_UPLOAD_BUCKET_NAME }}" \
+            -var="logger_bucket_name=${{ secrets.LOGGER_BUCKET_NAME }}"
+        working-directory: .devops/terraform
+
+  migrate:
+    needs: deploy
+    runs-on: ubuntu-latest
+    environment: dev
+    env:
+      PYTHONPATH: src
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v2
@@ -23,14 +90,4 @@ jobs:
         working-directory: apps/image_api
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: |
-          alembic upgrade head
-      - uses: hashicorp/setup-terraform@v3
-      - run: terraform init
-        working-directory: .devops/terraform
-      - name: Terraform Plan
-        run: terraform plan
-        working-directory: .devops/terraform
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
-        working-directory: .devops/terraform
+        run: uv run alembic upgrade head
