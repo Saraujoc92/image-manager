@@ -15,7 +15,7 @@ ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png"}
 
 @router.post(
     "",
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
     summary="Upload an image",
     description="Upload an image to the team. Supported formats: JPEG, PNG. Max size: 2 MB.",
     responses={
@@ -75,7 +75,7 @@ def upload_image(
 
 @router.get(
     "/all",
-    status_code=200,
+    status_code=status.HTTP_200_OK,
     summary="Get all images for a team",
     description="Retrieve all images uploaded to the team. Requires active team membership.",
     response_model=list[GetImageResponse],

@@ -2,35 +2,41 @@
 
 Prototype image management service that allows teams to securely store, organize, and  retrieve images. Api is served using FastApi to store images in GCS
 
+The app allows *Users* to upload *Images*. *Users* belong to *Teams* and can list *Images* uploaded by other team members. The api is accessed with api keys provided on user creation. An admin *User* is created on app initialization. Only this user can create *Teams*. A default api key `ADMIN_ACCESS` is given to this user on the initial database migration. Make sure this key is rotated using `POST /api/v1/user/{user_id}/credentials/rotate`.
+
 ## Architecture
 
-This project is meant to hold a collection of applications exposed through an api. This architecture would allow a fast and responsive api 
-delegating long running processes to different applications. This would also allow for independent scaling of the api and the processing apps.
+This project is meant to hold a collection of applications exposed through an api. This architecture would allow a fast and responsive api delegating long running processes to different applications. This would also allow for independent scaling of the api and the processing apps. These apps would communicate directly, or through other services. For example, events triggered on file upload could trigger a more demanding processing without slowing the user-facing api
 
 ```
-+-------+        +-------+
-| User  | -----> |  API  |
-+-------+        +-------+
-                     |
-       +-------------+-------------+
-       |                           |
-+------------+             +---------------+
-|  Database  |             | Storage Bucket|
-+------------+             +---------------+
-       ^                           ^
-       |                           |
-       +-------------+-------------+
-                     |
-          +---------------------+
-          |     App Servers     |
-          |  (1...N Instances)  |
-          +---------------------+
++-------+                      +-------+
+| User  | -------------------->|  API  |
++-------+                      +-------+
+                                   |
+       +---------------------------+ --------------------------+
+       |                           |                           |
++-------------+             +---------------+          +----------------+
+|  Databases  |             | Storage Bucket|          | Other services |
++-------------+             +---------------+          +----------------+ 
+       ^                           ^                           ^
+       |                           |                           |
+       +---------------------------+---------------------------+
+                                   |
+                        +---------------------+
+                        |     App Servers     |
+                        |  (1...N Instances)  |
+                        +---------------------+
 ```
+
+The current architecture could be used as a building block of a scalable high demand service enabling scaling of the api service and adding a load balancer.
 
 ## Cool features
 
 - Infraestructure defined in terraform for reusable deployments
 - Project with full CI/CD integrated through github actions and terraform
+    1. runs lint and tests
+    2. builds and deploys
+    3. runs db migrations
 - Configurable logs bucket to store important events
 
 
@@ -66,10 +72,17 @@ pytest
 - `gcloud_credentials.json` file should be present on the root of the project
 - Set up [Google Application Default Credentials](https://cloud.google.com/docs/authentication/set-up-adc-local-dev-environment)
 - Create a project and a gcs bucket to upload images
+- To use a local dockerized db, run the migrations before starting the app
+```
+docker-compose run db -d
+```
+- [Activate the environment](#virtual-environment)
+```
+# still on apps/image_api
+DATABASE_URL=postgresql://postgres:password@localhost:5432/image_db alembic upgrade head
+```
 
 #### Using docker
-
-From the root folder run 
 
 - create a `.env` file on the root of the project with the following values
 ```
@@ -91,8 +104,7 @@ PYTHONPATH=SRC
 DATABASE_URL=****
 IMAGE_UPLOAD_BUCKET_NAME=****
 ``` 
-- `cd apps/image_api`
 - [Activate the environment](#virtual-environment)
-- run `fastapi dev src/main.py`
+- still on `apps/image_api` run `fastapi dev src/main.py`
 - local server will be available on `http://localhost:8000/docs`
 

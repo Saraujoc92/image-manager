@@ -1,4 +1,5 @@
 from datetime import datetime
+import os
 import uuid
 from clients import cloud_storage
 import pytest
@@ -78,6 +79,8 @@ def mock_cloud_storage(monkeypatch):
 
 @pytest.fixture(scope="function")
 def client(db_session):
+    os.environ["IMAGE_UPLOAD_BUCKET_NAME"] = "test-bucket"
+    
     from main import app
     from database.client import get_db
 

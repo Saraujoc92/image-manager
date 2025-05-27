@@ -7,7 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PYTHONPATH: src
-      IMAGE_UPLOAD_BUCKET_NAME: test-img-bucket
       LOGGER_BUCKET_NAME: test-logger-bucket
     steps:
       - uses: actions/checkout@v3

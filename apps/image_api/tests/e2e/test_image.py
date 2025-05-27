@@ -12,7 +12,7 @@ def test_upload_image(client, new_team_and_user):
         files=image_data,
         headers=headers,
     )
-    assert response.status_code == 201
+    assert response.status_code == 200
 
     response = client.get(
         f"/api/v1/team/{team_id}/image/all",
@@ -43,7 +43,7 @@ def test_image_team_only_access(client, new_team_and_user):
         files=image_data,
         headers=headers,
     )
-    assert response.status_code == 201
+    assert response.status_code == 200
 
     _, other_user = new_team_and_user(
         "Other Team With no Image Access", "impostor@mail.com"

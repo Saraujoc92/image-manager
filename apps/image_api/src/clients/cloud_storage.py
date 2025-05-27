@@ -5,10 +5,13 @@ from google.cloud import storage
 
 import logger
 
-image_bucket_name_env = os.getenv("IMAGE_UPLOAD_BUCKET_NAME")
-if not image_bucket_name_env:
-    raise ValueError("IMAGE_UPLOAD_BUCKET_NAME environment variable is not set.")
-image_bucket_name: str = image_bucket_name_env
+
+def _get_image_bucket_name() -> str:
+    """Retrieve the image bucket name from environment variables."""
+    image_bucket_name_env = os.getenv("IMAGE_UPLOAD_BUCKET_NAME")
+    if not image_bucket_name_env:
+        raise ValueError("IMAGE_UPLOAD_BUCKET_NAME environment variable is not set.")
+    return image_bucket_name_env
 
 
 def _get_cloud_storage_client():
@@ -35,12 +38,13 @@ def _upload_file_to_bucket(
 
 
 def upload_image_to_bucket(file_path: str, file: bytes, request: Request):
-    return _upload_file_to_bucket(file_path, file, request, image_bucket_name)
+    return _upload_file_to_bucket(file_path, file, request, _get_image_bucket_name())
 
 
 def get_bucket_file_url(file_path: str) -> str:
     """Returns the public URL of a file in the Google Cloud Storage bucket."""
     client = _get_cloud_storage_client()
+    image_bucket_name = _get_image_bucket_name()
     try:
         bucket = client.bucket(image_bucket_name)
         blob = bucket.blob(file_path)
