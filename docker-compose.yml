@@ -10,6 +10,11 @@ services:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://postgres:password@db:5432/image_db
+      - IMAGE_UPLOAD_BUCKET_NAME=${IMAGE_UPLOAD_BUCKET_NAME}
+      - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT}
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/creds.json
+    volumes:
+      - ${GCLOUD_CREDS_PATH}:/app/creds.json
     depends_on:
       - db
     healthcheck:
