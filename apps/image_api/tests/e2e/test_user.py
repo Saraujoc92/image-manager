@@ -23,6 +23,15 @@ def test_fail_bad_request_create_user(client, admin_headers, new_team):
         headers=admin_headers,
     )
     assert response.status_code == 400
+    
+    #malformed email
+    response = client.post(
+        f"/api/v1/team/{team_id}/user",
+        json={"email": "not-an-email", "name": "Test User"},
+        headers=admin_headers,
+    )
+    assert response.status_code == 400
+
 
 def test_rotate_user_credentials(client, new_team_and_user):
     team, user = new_team_and_user("Test Team for User Credential Rotation")

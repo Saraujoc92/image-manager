@@ -91,7 +91,6 @@ IMAGE_UPLOAD_BUCKET_NAME=********
 docker compose up -d
 ```
 
-- on a new terminal
 - [Activate the environment](#virtual-environment)
 
 ```

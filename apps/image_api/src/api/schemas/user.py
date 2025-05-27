@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from uuid import UUID
 from datetime import datetime
 
@@ -18,7 +18,7 @@ class RotateUserCredentialsResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 class CreateUserRequest(BaseModel):
-    email: str
+    email: EmailStr
     name: str
 
 
