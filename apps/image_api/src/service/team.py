@@ -15,7 +15,6 @@ def get_all_teams(db: DbSession, request: Request) -> Sequence[Team]:
     teams = team_repository.get_all_teams(db)
     logger.info(f"Retrieved {len(teams)} teams from the database", request)
     return teams
-    return teams
 
 
 def get_team_by_id(db: DbSession, team_id: UUID, request: Request) -> Team:

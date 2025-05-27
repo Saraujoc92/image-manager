@@ -13,7 +13,7 @@ router = APIRouter(prefix="/team", tags=["Teams"])
 @router.get(
     "/all",
     summary="Get all teams [Admin Only]",
-    description="Get all teams. **Requires admin privileges**.",
+    description="Get all active teams. **Requires admin privileges**.",
     response_model=list[GetTeamResponse],
 )
 @limiter.limit("10/minute")

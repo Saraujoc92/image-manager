@@ -10,7 +10,7 @@ from database.models.team import Team
 
 
 def get_all_teams(db: DbSession) -> list[Team]:
-    return db.query(Team).all()
+    return db.query(Team).filter(Team.active).all()
 
 
 def get_team_by_id(db: DbSession, team_id: UUID) -> Optional[Team]:
