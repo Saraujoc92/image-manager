@@ -17,7 +17,7 @@ ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png"}
     "",
     status_code=status.HTTP_201_CREATED,
     summary="Upload an image",
-    description="Upload an image to the team. Supported formats: JPEG, PNG.",
+    description="Upload an image to the team. Supported formats: JPEG, PNG. Max size: 2 MB.",
     responses={
         200: {
             "description": "Image uploaded successfully",
@@ -47,7 +47,7 @@ ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png"}
         },
     },
 )
-@limiter.limit("1/minute")
+@limiter.limit("3/minute")
 def upload_image(
     db: DbSession,
     user: RequireSameTeamUser,
@@ -63,6 +63,9 @@ def upload_image(
 
     if not image_bytes:
         raise BadRequestError("Empty file")
+    
+    if len(image_bytes) > 2 * 1024 * 1024:  # 2 MB limit
+        raise BadRequestError("File size exceeds 2 MB limit")
 
     image_service.upload_image(
         db, team.id, user.id, file.filename or "nn", image_bytes, request
