@@ -13,7 +13,7 @@ class Image(Base):
     cloud_path = Column(String(), nullable=False, unique=True)
     uploaded_by = Column(UUID(as_uuid=True), nullable=False)
     owner_team = Column(UUID(as_uuid=True), nullable=False)
-    created_at = Column(DateTime, default=datetime.now())
+    created_at = Column(DateTime, default=datetime.now)
     deleted_at = Column(DateTime)
 
     def __repr__(self):

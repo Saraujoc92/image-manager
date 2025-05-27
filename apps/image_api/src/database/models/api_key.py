@@ -12,7 +12,7 @@ class ApiKey(Base):
     key = Column(String, unique=True, index=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(UUID(as_uuid=True), ForeignKey("app_user.id"), nullable=False)
     active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.now())
+    created_at = Column(DateTime, default=datetime.now)
     deleted_at = Column(DateTime)
 
     def __repr__(self):
