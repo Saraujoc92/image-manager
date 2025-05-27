@@ -19,9 +19,7 @@ def test_upload_image(client, new_team_and_user):
         headers=headers,
     )
     assert response.status_code == 200
-    all_images = response.json()
-    assert "images" in all_images
-    images = all_images.get("images")
+    images = response.json() 
     assert isinstance(images, list)
     assert len(images) == 1
     image = images[0]
@@ -62,9 +60,8 @@ def test_image_team_only_access(client, new_team_and_user):
         headers=headers,
     )
     assert response.status_code == 200
-    response_data = response.json()
-    assert "images" in response_data
-    assert len(response_data["images"]) == 1
+    images = response.json()
+    assert len(images) == 1
 
 def test_upload_empty_file(client, admin_headers, new_team):
     team = new_team("Test Team for Empty File Upload")

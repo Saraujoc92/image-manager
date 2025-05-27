@@ -27,9 +27,9 @@ def get_team_by_id(db: DbSession, team_id: UUID, request: Request) -> Team:
 
 
 def create_team(db: DbSession, team_name: str, request: Request) -> Team:
-    new_team = team_repository.create_team(db, team_name)
+    new_team = team_repository.create_team(db, team_name, request)
     if not new_team:
-        raise BadRequestError(message="Failed to create team")
+        raise BadRequestError(message="Team already exists")
     logger.info(f"Created team {new_team.name}: ID {new_team.id}", request)
     return new_team
 

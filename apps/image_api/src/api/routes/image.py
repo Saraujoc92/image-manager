@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Request, UploadFile
+from fastapi import APIRouter, Request, UploadFile, status
 
 from api.auth.require_team import RequireActiveTeam, RequireSameTeamUser
 from api.exceptions import BadRequestError
+from api.schemas.image import GetImageResponse
 from database.client import DbSession
 from api.rate_limiter import limiter
 import logger
@@ -12,7 +13,40 @@ router = APIRouter(prefix="/team/{team_id}/image", tags=["Images"])
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png"}
 
 
-@router.post("", status_code=201)
+@router.post(
+    "",
+    status_code=status.HTTP_201_CREATED,
+    summary="Upload an image",
+    description="Upload an image to the team. Supported formats: JPEG, PNG.",
+    responses={
+        200: {
+            "description": "Image uploaded successfully",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "message": "Uploaded successfully",
+                        "team_id": "*****",
+                        "user_id": "*****",
+                    }
+                }
+            },
+        },
+        400: {
+            "description": "Bad Request",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "Unsupported image type. Allowed types are: JPEG, PNG"
+                    }
+                }
+            },
+        },
+        404: {
+            "description": "Not Found",
+            "content": {"application/json": {"example": {"detail": "Team not found"}}},
+        },
+    },
+)
 @limiter.limit("1/minute")
 def upload_image(
     db: DbSession,
@@ -26,19 +60,32 @@ def upload_image(
 
     logger.info(f"Uploading image for team {team.id}", request)
     image_bytes = file.file.read()
-    
+
     if not image_bytes:
         raise BadRequestError("Empty file")
-    
-    image_service.upload_image(db, team.id, user.id, file.filename, image_bytes, request)
+
+    image_service.upload_image(
+        db, team.id, user.id, file.filename or "nn", image_bytes, request
+    )
     return {"message": "Uploaded successfully", "team_id": team.id, "user_id": user.id}
 
 
-@router.get("/all", status_code=200)
+@router.get(
+    "/all",
+    status_code=200,
+    summary="Get all images for a team",
+    description="Retrieve all images uploaded to the team. Requires active team membership.",
+    response_model=list[GetImageResponse],
+    responses={
+        404: {
+            "description": "Not Found",
+            "content": {"application/json": {"example": {"detail": "Team not found"}}},
+        }
+    },
+)
 @limiter.limit("5/minute")
 def get_all_images(
     db: DbSession, user: RequireSameTeamUser, team: RequireActiveTeam, request: Request
 ):
     logger.info(f"Retrieving all images for team {team.id}", request)
-    images = image_service.get_all_images(db, team.id, request)
-    return {"images": images}
+    return image_service.get_all_images(db, team.id, request)
